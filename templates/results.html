@@ -1,0 +1,55 @@
+
+<!doctype html>
+<html>
+<head>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body class="container py-4">
+
+<div class="d-flex justify-content-between mb-3">
+<a href="/" class="btn btn-secondary">← Dashboard</a>
+<a href="/scan/{{ job.domain }}" class="btn btn-primary">Back to Scan</a>
+</div>
+
+<h3>Results: {{ job.domain }}</h3>
+
+<a class="btn btn-sm btn-outline-info mb-4"
+ href="?{% if only_alive %}{% else %}http_alive=yes{% endif %}">
+{% if only_alive %}Show All{% else %}Only HTTP Alive{% endif %}
+</a>
+
+{% for s in subdomains %}
+<div class="card mb-3">
+<div class="card-header d-flex justify-content-between">
+<strong>{{ s.name }}</strong>
+<span class="badge {% if s.http_alive %}bg-success{% else %}bg-secondary{% endif %}">
+{{ 'HTTP Alive' if s.http_alive else 'No HTTP' }}
+</span>
+</div>
+
+<div class="card-body">
+{% set cats = grouped_results.get(s.id, {}) %}
+{% if cats %}
+{% for cat, raws in cats.items() %}
+<button class="btn btn-sm btn-outline-primary mb-2"
+ data-bs-toggle="collapse"
+ data-bs-target="#collapse-{{ s.id }}-{{ loop.index }}">
+{{ cat }} ({{ raws|length }})
+</button>
+
+<div id="collapse-{{ s.id }}-{{ loop.index }}" class="collapse">
+{% for r in raws %}
+<pre class="bg-light p-2 border rounded small">{{ r }}</pre>
+{% endfor %}
+</div>
+{% endfor %}
+{% else %}
+<p class="text-muted mb-0">No findings</p>
+{% endif %}
+</div>
+</div>
+{% endfor %}
+
+</body>
+</html>
